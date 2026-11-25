@@ -3,6 +3,59 @@
 
 # app-run-fmriprep
 
+<!-- brainlife-app:begin (generated from the App manifest; edit the manifest, not this block) -->
+
+> **Preprocesses BOLD fMRI with fMRIPrep 21.0.1 and outputs surface time series (GIFTI and CIFTI) on fsaverage or fsnative surfaces, confound regressors, brain masks and an HTML report.**
+
+Fork of the brainlife fMRIPrep surface App that runs fMRIPrep 21.0.1 with a FreeSurfer input and maps the surface-space BOLD outputs (left/right GIFTI, 91k CIFTI dtseries and, for fsnative, the surface vertices) to brainlife datatypes. Needs a T1w, a raw BOLD and the FreeSurfer output of the same T1w. Although the App lists an ICA-AROMA output, this configuration has no aroma parameter, so ICA-AROMA is never enabled and that output stays empty.
+
+| | |
+|---|---|
+| 📥 **Inputs** | `neuro/anat/t1w` · `neuro/func/task` · `neuro/freesurfer` · `neuro/anat/t2w` (optional) · `neuro/fmap` (optional) |
+| 📤 **Outputs** | `neuro/regressors` ×2 · `neuro/anat/t1w` · `neuro/mask` · `report/html` · `neuro/cifti` · `neuro/surface/data` · `neuro/surface/vertices` |
+| 🐳 **Container** | `nipreps/fmriprep:21.0.1` |
+| ⚙️ **Resources** | 16 CPUs · 28 GB memory · 9 h walltime |
+| 🔑 **Requires** | `FREESURFER_LICENSE` |
+| 🔗 **Run it** | [doi.org/10.25663/brainlife.app.686](https://doi.org/10.25663/brainlife.app.686) |
+
+#### 📥 Inputs
+
+| Input | Datatype | Required | Description |
+|---|---|---|---|
+| `t1w` | `neuro/anat/t1w` | yes | t1 anatomy to register the input fmri data. Please be sure to use the same t1 used to generate the freesurfer input. Must be the same T1w used to generate the FreeSurfer input. |
+| `fmri` | `neuro/func/task` (!preprocessed) | yes | fmri data to preprocess |
+| `freesurfer` | `neuro/freesurfer` (!v5) | yes | freesurfer output used to aid preprocessing |
+| `t2w` | `neuro/anat/t2w` | no | Optional T2-weighted image of the same subject, converted into the BIDS input given to fMRIPrep. |
+| `fmap` | `neuro/fmap` | no | 2phasemag fieldmap is not yet supported by fmriprep (https://github.com/poldracklab/sdcflows/issues/15) - testing 1.5.2 should should suppor it. |
+
+#### 📤 Outputs
+
+| Output | Datatype | Description |
+|---|---|---|
+| `regress` | `neuro/regressors` | fMRIPrep confounds time series (regressors.tsv and its JSON sidecar). |
+| `anat` | `neuro/anat/t1w` | preprocessed t1 (same alignment as the original t1, but level adjusted - editme) |
+| `anat_mask` | `neuro/mask` | Brain mask of the preprocessed T1w in the original T1w space. |
+| `output_report` | `report/html` | fmriprep HTML report and figures |
+| `cifti` | `neuro/cifti` | surface timeseries data in cifti |
+| `surface-data` | `neuro/surface/data` | Preprocessed BOLD time series on the left and right hemisphere surfaces (GIFTI func.gii) in the selected surface space. |
+| `surface-vertices` | `neuro/surface/vertices` | surface vertices. only meaningful for fsnative. |
+| `aroma` | `neuro/regressors` | AROMA ICA regressors |
+
+<details>
+<summary><b>⚙️ Parameters</b> (2)</summary>
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `space` | enum | `fsaverage5` | Surface output space for the BOLD time series: fsaverage5, fsaverage6 or the subject's native FreeSurfer surface (fsnative). Options: `fsaverage5`, `fsaverage6`, `fsnative`. |
+| `skipbidsvalidation` | boolean | `false` | Skip the BIDS validation of input data. Try this option if your data is not BIDS compatible but you'd like to go ahead and process it through fmriprep anyway. |
+
+</details>
+
+📚 **References used by this App:**
+- Esteban O. et al. fMRIPrep: a robust preprocessing pipeline for functional MRI. Nature Methods 16, 111-116 (2019). [doi:10.1038/s41592-018-0235-4](https://doi.org/10.1038/s41592-018-0235-4)
+
+<!-- brainlife-app:end -->
+
 This app runs [fMRIPrep](https://github.com/poldracklab/fmriprep) on the [brainlife.io](https://brainlife.io/) interface. fMRIPrep is a robust processing tool delevoped by the [Poldrack Lab at Stanford](https://poldracklab.stanford.edu/). The pipelines process T1w, T2w, fMRI, and fieldmaps by calling a series of functions from FSL, FreeSurfer, ANTs, and nipy. It applies these tools in a principled way designed to handle common imaging artifacts and biases in a parimonious manner. It outputs processed anatomical and functional images for further analysis. 
 
 #### citiations and resources to consider
